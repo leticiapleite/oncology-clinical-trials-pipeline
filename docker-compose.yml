@@ -1,0 +1,75 @@
+
+services:
+  airflow_db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+
+  airflow:
+    image: apache/airflow:2.9.1
+    depends_on:
+      - airflow_db
+      - warehouse
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_db:5432/airflow
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+      CTGOV_PAGE_SIZE: "200"  
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/requirements.txt:/requirements.txt
+    command: >
+      bash -c "pip install -r /requirements.txt && \
+               airflow db init && \
+               airflow users create \
+                 --username $${_AIRFLOW_WWW_USER_USERNAME} \
+                 --password $${_AIRFLOW_WWW_USER_PASSWORD} \
+                 --firstname admin --lastname user \
+                 --role Admin --email admin@example.com || true && \
+               airflow webserver & airflow scheduler"
+    ports:
+      - "8080:8080"
+
+  warehouse:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
+      POSTGRES_DB: healthcare
+    ports:
+      - "5433:5432"
+    volumes:
+      - warehouse_data:/var/lib/postgresql/data
+
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.9.latest
+    depends_on:
+      - warehouse
+    working_dir: /usr/app
+    environment:
+      DBT_PROFILES_DIR: /usr/app/profiles
+    volumes:
+      - ./dbt:/usr/app
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+  app:
+    image: python:3.11-slim
+    depends_on:
+      - warehouse
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    command: bash -c "pip install -r requirements.txt && streamlit run app.py --server.port=8501 --server.address=0.0.0.0"
+    ports:
+      - "8501:8501"
+
+volumes:
+  airflow_db_data:
+  warehouse_data:

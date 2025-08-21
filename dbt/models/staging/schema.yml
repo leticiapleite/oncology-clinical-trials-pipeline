@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: stg_ctgov
+    columns:
+      - name: nct_id
+        tests:
+          - not_null
+          - unique

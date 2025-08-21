@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: status_distribution
+    columns:
+      - name: overall_status
+        tests: [not_null]
+      - name: n
+        tests: [not_null]
+
+  - name: countries_top
+    columns:
+      - name: country
+        tests: [not_null]
+      - name: n
+        tests: [not_null]
+
+  - name: starts_by_status_month
+    columns:
+      - name: month
+        tests: [not_null]
+      - name: overall_status
+        tests: [not_null]
+      - name: trials_started
+        tests: [not_null]

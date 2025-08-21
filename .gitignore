@@ -1,0 +1,26 @@
+# env
+.env
+
+# airflow
+airflow/logs/
+airflow/.venv/
+airflow/*.pid
+
+# dbt
+dbt/target/
+dbt/logs/
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/

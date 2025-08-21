@@ -1,0 +1,11 @@
+health_profile:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: warehouse
+      user: analytics
+      password: analytics
+      port: 5432
+      dbname: healthcare
+      schema: public
